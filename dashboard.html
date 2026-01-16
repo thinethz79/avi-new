@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Predictor Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF004D;
+            --secondary: #9E0030;
+            --bg-dark: #0a0a0a;
+            --card-bg: #141414;
+            --text-gray: #888888;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
+            overflow-x: hidden;
+            /* Hexagonal Pattern Background */
+            background-image: 
+                radial-gradient(circle at 50% 0%, #2a0a12 0%, transparent 70%),
+                linear-gradient(rgba(10, 10, 10, 0.9), rgba(10, 10, 10, 0.95)),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23333333' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+
+        /* Aviator Logo Style */
+        .brand-text {
+            font-style: italic;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .glass-card {
+            background: linear-gradient(180deg, rgba(30, 30, 30, 0.9) 0%, rgba(20, 20, 20, 0.95) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Radar Loader */
+        .radar-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 0, 77, 0.2);
+            background: radial-gradient(circle, rgba(255,0,77,0.05) 0%, rgba(0,0,0,0) 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(255, 0, 77, 0.1);
+        }
+
+        .radar-sweep {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            border-top: 2px solid var(--primary);
+            border-right: 2px solid transparent;
+            border-left: 2px solid transparent;
+            animation: radarSpin 1.5s linear infinite;
+            filter: drop-shadow(0 0 10px var(--primary));
+            display: none; /* Hidden by default */
+        }
+
+        .radar-sweep::after {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px var(--primary);
+        }
+
+        @keyframes radarSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Big Button */
+        .btn-primary {
+            background: linear-gradient(92deg, #FF004D 0%, #CC003D 100%);
+            border: none;
+            box-shadow: 0 10px 25px rgba(255, 0, 77, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:active {
+            transform: scale(0.96);
+            box-shadow: 0 5px 15px rgba(255, 0, 77, 0.2);
+        }
+
+        /* Inject Buttons */
+        .inject-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 10px;
+            color: #666;
+            transition: all 0.3s;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .inject-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #aaa;
+        }
+        .inject-btn.active {
+            background: rgba(255, 0, 77, 0.15);
+            border-color: #FF004D;
+            color: #FF004D;
+            box-shadow: 0 0 15px rgba(255, 0, 77, 0.1);
+        }
+        .inject-btn.active::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: #FF004D;
+            border-radius: 50%;
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            box-shadow: 0 0 5px #FF004D;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        
+        /* History Item */
+        .history-item {
+            background: rgba(255,255,255,0.03);
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .history-item.high { border-left-color: #A855F7; background: rgba(168, 85, 247, 0.05); } /* Purple */
+        .history-item.ultra { border-left-color: #FF004D; background: rgba(255, 0, 77, 0.05); } /* Red */
+        .history-item.low { border-left-color: #3B82F6; } /* Blue */
+
+        /* Animations */
+        @keyframes pulse-text {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-fast { animation: pulse-text 1.5s infinite; }
+
+        .plane-fly {
+            animation: fly 3s ease-in-out infinite;
+        }
+        @keyframes fly {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Input Reset */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Top Bar -->
+    <div class="w-full max-w-md flex justify-between items-center mb-6 pt-2">
+        <div class="flex flex-col">
+            <h1 class="text-3xl font-black brand-text text-white leading-none">AVIATOR</h1>
+            <span class="text-xs tracking-[0.3em] text-red-500 font-bold ml-1">PREDICTOR</span>
+        </div>
+        <div class="flex items-center gap-2 bg-white/5 rounded-full px-3 py-1 border border-white/10">
+            <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></div>
+            <span class="text-[10px] font-bold text-gray-400">ONLINE</span>
+        </div>
+    </div>
+
+    <!-- Main Widget -->
+    <div class="w-full max-w-md glass-card rounded-3xl p-6 mb-6 relative overflow-hidden">
+        
+        <!-- Decoration behind -->
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent opacity-50"></div>
+
+        <!-- Injection Buttons -->
+        <div class="grid grid-cols-3 gap-2 mb-4 relative z-10">
+            <button class="inject-btn" onclick="selectServer(this, '1XBET')">
+                <i class="fa-solid fa-server text-[8px] opacity-50"></i>
+                <span class="text-[9px] font-bold">1XBET</span>
+            </button>
+            <button class="inject-btn" onclick="selectServer(this, '888STARZ')">
+                <i class="fa-solid fa-server text-[8px] opacity-50"></i>
+                <span class="text-[9px] font-bold">888STARZ</span>
+            </button>
+            <button class="inject-btn" onclick="selectServer(this, 'MELBET')">
+                <i class="fa-solid fa-server text-[8px] opacity-50"></i>
+                <span class="text-[9px] font-bold">MELBET</span>
+            </button>
+        </div>
+
+        <!-- Calibration Section (Updated for 5 Rounds) -->
+        <div class="mb-6 relative z-10 bg-black/20 p-3 rounded-xl border border-white/5 backdrop-blur-sm">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase">HISTORY ANALYSIS (LAST 5)</span>
+                <i class="fa-solid fa-chart-line text-red-500/50 text-xs"></i>
+            </div>
+            
+            <div class="grid grid-cols-[1fr_1fr] gap-2 mb-1 px-1">
+                <label class="text-[8px] text-gray-600 font-bold tracking-wider text-center">TIME</label>
+                <label class="text-[8px] text-gray-600 font-bold tracking-wider text-center">ODD</label>
+            </div>
+
+            <div class="space-y-2 mb-3">
+                <!-- Row 1 -->
+                <div class="grid grid-cols-[1fr_1fr] gap-2">
+                    <input type="time" class="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-mono text-[10px] w-full focus:outline-none focus:border-red-500/50 text-center calibration-time-input">
+                    <input type="number" step="0.01" placeholder="0.00x" class="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-mono text-[10px] w-full focus:outline-none focus:border-red-500/50 text-center">
+                </div>
+                <!-- Row 2 -->
+                <div class="grid grid-cols-[1fr_1fr] gap-2">
+                    <input type="time" class="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-mono text-[10px] w-full focus:outline-none focus:border-red-500/50 text-center calibration-time-input">
+                    <input type="number" step="0.01" placeholder="0.00x" class="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-mono text-[10px] w-full focus:outline-none focus:border-red-500/50 text-center">
+                </div>
+                <!-- Row 3 -->
+                <div class="grid grid-cols-[1fr_1fr] gap-2">
+                    <input type="time" class="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-mono text-[10px] w-full focus:outline-none focus:border-red-500/50 text-center calibration-time-input">
+                    <input type="number" step="0.01" placeholder="0.00x" class="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-mono text-[10px] w-full focus:outline-none focus:border-red-500/50 text-center">
+                </div>
+                <!-- Row 4 -->
+                <div class="grid grid-cols-[1fr_1fr] gap-2">
+                    <input type="time" class="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-mono text-[10px] w-full focus:outline-none focus:border-red-500/50 text-center calibration-time-input">
+                    <input type="number" step="0.01" placeholder="0.00x" class="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-mono text-[10px] w-full focus:outline-none focus:border-red-500/50 text-center">
+                </div>
+                <!-- Row 5 -->
+                <div class="grid grid-cols-[1fr_1fr] gap-2">
+                    <input type="time" class="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-mono text-[10px] w-full focus:outline-none focus:border-red-500/50 text-center calibration-time-input">
+                    <input type="number" step="0.01" placeholder="0.00x" class="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-white font-mono text-[10px] w-full focus:outline-none focus:border-red-500/50 text-center">
+                </div>
+            </div>
+
+            <!-- Sync Button -->
+            <button onclick="calibrate()" class="w-full py-2 bg-gradient-to-r from-red-500/10 to-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-[10px] font-bold hover:from-red-500/20 hover:to-red-500/30 transition-all shadow-[0_0_10px_rgba(255,0,77,0.1)] flex items-center justify-center">
+                <i class="fa-solid fa-rotate mr-2"></i> SYNC DATA
+            </button>
+            
+            <div id="calibration-msg" class="text-[9px] text-green-500 font-mono mt-2 h-3 flex items-center justify-center gap-1 opacity-0 transition-opacity duration-300">
+                <i class="fa-solid fa-check-circle"></i> <span>ALGORITHM SYNCED</span>
+            </div>
+        </div>
+
+        <!-- Center Display -->
+        <div class="radar-container mb-8">
+            <div id="radar-sweep" class="radar-sweep"></div>
+            
+            <div class="flex flex-col items-center justify-center z-10">
+                <i class="fa-solid fa-plane-up text-4xl text-red-500 mb-2 plane-fly transition-opacity duration-300" id="center-icon"></i>
+                
+                <div id="prediction-text" class="text-6xl font-black orbitron text-white tracking-tight drop-shadow-2xl">
+                    1.00x
+                </div>
+                <div id="status-text" class="text-xs font-bold text-gray-500 mt-2 tracking-widest uppercase">
+                    SELECT SERVER
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Button -->
+        <button id="start-btn" onclick="predict()" class="w-full py-5 rounded-2xl btn-primary text-white font-bold text-lg tracking-widest uppercase group relative overflow-hidden">
+            <span class="relative z-10 flex items-center justify-center gap-2">
+                Start Analysis <i class="fa-solid fa-bolt"></i>
+            </span>
+            <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+        </button>
+
+        <!-- Accuracy text -->
+        <div class="text-center mt-4">
+            <p class="text-[10px] text-gray-600">
+                AI CONFIDENCE: <span class="text-red-500 font-bold">96.8%</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- History Log -->
+    <div class="w-full max-w-md pb-8">
+        <div class="flex justify-between items-end mb-3 px-2">
+            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Recent Signals</h2>
+            <div class="text-xs font-mono text-gray-600" id="clock">00:00:00</div>
+        </div>
+
+        <div class="flex flex-col gap-2" id="history-list">
+            <!-- Empty State -->
+            <div id="empty-state" class="text-center py-8 border border-dashed border-gray-800 rounded-xl">
+                <p class="text-xs text-gray-600">No predictions generated yet</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Pre-fill time inputs with reasonable defaults
+        const nowDefault = new Date();
+        const timeInputs = document.querySelectorAll('.calibration-time-input');
+        
+        timeInputs.forEach((input, index) => {
+            // Subtract minutes based on index to simulate history
+            const pastDate = new Date(nowDefault.getTime() - (index * 2 * 60000));
+            const hours = String(pastDate.getHours()).padStart(2, '0');
+            const minutes = String(pastDate.getMinutes()).padStart(2, '0');
+            input.value = `${hours}:${minutes}`;
+        });
+
+        // System Clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+        }, 1000);
+
+        const startBtn = document.getElementById('start-btn');
+        const radarSweep = document.getElementById('radar-sweep');
+        const predictionText = document.getElementById('prediction-text');
+        const statusText = document.getElementById('status-text');
+        const centerIcon = document.getElementById('center-icon');
+        const historyList = document.getElementById('history-list');
+        const emptyState = document.getElementById('empty-state');
+        const calibrationMsg = document.getElementById('calibration-msg');
+
+        let isProcessing = false;
+        let selectedServer = null;
+        let isCalibrated = false;
+
+        function selectServer(btn, name) {
+            // Reset all buttons
+            document.querySelectorAll('.inject-btn').forEach(b => b.classList.remove('active'));
+            // Activate clicked button
+            btn.classList.add('active');
+            selectedServer = name;
+            
+            // Visual Feedback
+            if(!isProcessing) {
+                statusText.innerText = `INJECTED: ${name}`;
+                statusText.className = "text-xs font-bold text-green-500 mt-2 tracking-widest uppercase animate-[pulse_0.5s_ease-in-out]";
+            }
+        }
+
+        function calibrate() {
+            const btn = document.querySelector('button[onclick="calibrate()"]');
+            const originalHTML = btn.innerHTML;
+            
+            // Simulation
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> PROCESSING';
+            btn.classList.add('opacity-70');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('opacity-70');
+                
+                calibrationMsg.style.opacity = '1';
+                calibrationMsg.innerHTML = '<i class="fa-solid fa-check-circle"></i> <span>ALGORITHM SYNCED</span>';
+                calibrationMsg.className = "text-[9px] text-green-500 font-mono mt-2 h-3 flex items-center justify-center gap-1 opacity-100 transition-opacity duration-300";
+                
+                isCalibrated = true;
+                
+                // Hide success msg after 3s
+                setTimeout(() => {
+                    calibrationMsg.style.opacity = '0';
+                }, 3000);
+            }, 1500);
+        }
+
+        function getRandomOdd() {
+            // STRICTLY 5.00x AND ABOVE
+            const r = Math.random();
+            
+            // Generate numbers mostly between 5x and 15x, occasionally higher
+            if (r < 0.7) {
+                // 70% chance: 5.00x - 12.00x
+                return (5.00 + Math.random() * 7.00).toFixed(2);
+            } else if (r < 0.9) {
+                // 20% chance: 12.00x - 25.00x
+                return (12.00 + Math.random() * 13.00).toFixed(2);
+            } else {
+                // 10% chance: 25.00x - 100.00x+
+                return (25.00 + Math.random() * 75.00).toFixed(2);
+            }
+        }
+
+        function predict() {
+            if (isProcessing) return;
+            
+            if (!selectedServer) {
+                // Shake animation for warning
+                startBtn.classList.add('animate-[bounce_0.5s]');
+                statusText.innerText = "PLEASE SELECT SERVER";
+                statusText.className = "text-xs font-bold text-red-500 mt-2 tracking-widest uppercase";
+                setTimeout(() => startBtn.classList.remove('animate-[bounce_0.5s]'), 500);
+                return;
+            }
+
+            // Optional: Prompt for calibration if not done
+            if (!isCalibrated) {
+                calibrationMsg.style.opacity = '1';
+                calibrationMsg.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <span>RECOMMENDED: SYNC HISTORY</span>';
+                calibrationMsg.className = "text-[9px] text-yellow-500 font-mono mt-2 h-3 flex items-center justify-center gap-1 opacity-100 transition-opacity duration-300 animate-pulse";
+            }
+
+            isProcessing = true;
+
+            // 1. Connection Phase
+            startBtn.style.opacity = '0.5';
+            startBtn.innerHTML = '<span class="animate-pulse">CONNECTING...</span>';
+            startBtn.disabled = true;
+            radarSweep.style.display = 'block';
+            statusText.innerText = "ESTABLISHING CONNECTION...";
+            statusText.className = "text-xs font-bold text-red-500 mt-2 tracking-widest uppercase animate-pulse-fast";
+            
+            // Reset Display
+            predictionText.style.opacity = '0.5';
+            predictionText.className = "text-6xl font-black orbitron text-white tracking-tight drop-shadow-2xl";
+            predictionText.innerText = "1.00x";
+            
+            centerIcon.classList.remove('plane-fly');
+            centerIcon.classList.add('animate-spin');
+
+            // 2. Start Flight Logic
+            setTimeout(() => {
+                const targetOdd = parseFloat(getRandomOdd());
+                
+                // Switch to Flight Mode
+                statusText.innerText = "TRACKING FLIGHT...";
+                statusText.className = "text-xs font-bold text-blue-400 mt-2 tracking-widest uppercase";
+                predictionText.style.opacity = '1';
+                centerIcon.classList.remove('animate-spin');
+                centerIcon.classList.add('plane-fly');
+                
+                animateFlight(targetOdd);
+                
+            }, 1500);
+        }
+
+        function animateFlight(target) {
+            let current = 1.00;
+            let increment = 0.01;
+            
+            const timer = setInterval(() => {
+                // Dynamic speed adjustment for realism
+                if (current > 100) increment = 0.5;
+                else if (current > 10) increment = 0.1;
+                else if (current > 5) increment = 0.05;
+                else if (current > 2) increment = 0.03;
+                else increment = 0.01;
+
+                current += increment;
+
+                // Update text color dynamically
+                if (current >= 2.00) predictionText.classList.replace('text-white', 'text-purple-400');
+                if (current >= 5.00) predictionText.classList.replace('text-purple-400', 'text-red-500');
+
+                if (current >= target) {
+                    clearInterval(timer);
+                    finishPrediction(target.toFixed(2));
+                } else {
+                    predictionText.innerText = current.toFixed(2) + 'x';
+                }
+            }, 10); // Flight tick rate - slightly faster for high odds
+        }
+
+        function finishPrediction(finalOdd) {
+            const now = new Date();
+            
+            // "Don't now": Start time is set to 1 minute in the future
+            const startTime = new Date(now.getTime() + 60000);
+            
+            // "Gap 1 minute or more": Add a random gap of 2 to 4 minutes
+            const gapMinutes = Math.floor(Math.random() * 3) + 2; 
+            const endTime = new Date(startTime.getTime() + (gapMinutes * 60000));
+            
+            const hh = String(startTime.getHours()).padStart(2, '0');
+            const mm = String(startTime.getMinutes()).padStart(2, '0');
+            const nextMm = String(endTime.getMinutes()).padStart(2, '0');
+            
+            const timeStr = `${hh}:${mm}/${nextMm}`;
+            
+            predictionText.innerText = finalOdd + 'x';
+            
+            // Final Color Logic (Always Ultra since > 5x)
+            let colorClass = 'text-red-500';
+            let typeClass = 'ultra';
+            
+            // Apply final specific style
+            predictionText.className = `text-6xl font-black orbitron ${colorClass} tracking-tight drop-shadow-2xl`;
+            
+            statusText.innerText = "CONFIRMED";
+            statusText.className = "text-xs font-bold text-green-500 mt-2 tracking-widest uppercase";
+            
+            radarSweep.style.display = 'none';
+
+            // Reset Button
+            startBtn.style.opacity = '1';
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<span class="relative z-10 flex items-center justify-center gap-2">NEXT SIGNAL <i class="fa-solid fa-arrow-right"></i></span>';
+            
+            addToHistory(timeStr, finalOdd, typeClass);
+            
+            isProcessing = false;
+        }
+
+        function addToHistory(time, odd, type) {
+            if (emptyState) emptyState.style.display = 'none';
+
+            const div = document.createElement('div');
+            div.className = `history-item ${type} p-3 rounded-lg flex justify-between items-center animate-[fadeIn_0.5s_ease-out]`;
+            
+            let oddColor = 'text-red-500 font-bold'; // Always red since we are doing 5x+
+
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/5 p-2 rounded text-[10px] text-gray-400 font-mono tracking-wider border border-white/10">${time}</div>
+                    <span class="text-[10px] text-gray-400 font-bold">${selectedServer}</span>
+                </div>
+                <div class="text-xl font-black orbitron ${oddColor}">${odd}x</div>
+            `;
+
+            historyList.insertBefore(div, historyList.firstChild);
+            
+            if(historyList.children.length > 8) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>

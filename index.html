@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Login</title>
+    <style>
+        /* --- RED & DARK THEME STYLES --- */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #050000; /* Pure black background */
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-image: radial-gradient(circle at center, #200000 0%, #000000 70%); /* Subtle red glow */
+        }
+
+        .container {
+            width: 380px;
+            padding: 30px;
+            background: #0f0505; /* Very dark red/black card */
+            border-radius: 12px;
+            border: 1px solid #3b0e0e; /* Dark red border */
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .logo-area { margin-bottom: 25px; }
+        .logo-icon { 
+            font-size: 40px; 
+            color: #ff3333; /* Neon Red */
+            margin-bottom: 10px; 
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+        }
+
+        h2 { margin: 0; font-size: 22px; font-weight: 600; color: #fff; text-transform: uppercase; letter-spacing: 2px; }
+
+        .input-group { margin-bottom: 15px; text-align: left; }
+        
+        label {
+            display: block; font-size: 11px; color: #ff6666; /* Light red label */
+            margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        input {
+            width: 100%; padding: 14px;
+            background-color: #1a0505; /* Dark input bg */
+            border: 1px solid #4a1010;
+            border-radius: 6px; color: #fff; font-size: 14px;
+            box-sizing: border-box; outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus { 
+            border-color: #ff3333; 
+            box-shadow: 0 0 8px rgba(255, 51, 51, 0.2);
+        }
+
+        button.login-btn {
+            width: 100%; padding: 14px;
+            background: linear-gradient(90deg, #990000, #ff0000); /* Red Gradient */
+            color: #fff; border: none; border-radius: 6px;
+            font-size: 14px; font-weight: 800; cursor: pointer;
+            margin-top: 10px; text-transform: uppercase; letter-spacing: 2px;
+            transition: opacity 0.2s, transform 0.1s;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        button.login-btn:hover { opacity: 0.9; }
+        button.login-btn:active { transform: scale(0.98); }
+
+        #statusMsg { margin-top: 15px; font-size: 13px; min-height: 20px; font-weight: bold; }
+
+        /* --- RED PURCHASE SECTION --- */
+        .purchase-box {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(255, 0, 0, 0.05);
+            border: 1px dashed #ff3333;
+            border-radius: 8px;
+        }
+
+        .purchase-title {
+            color: #ff3333; font-size: 14px; font-weight: bold;
+            margin-bottom: 5px; text-transform: uppercase;
+        }
+
+        .purchase-text {
+            font-size: 12px; color: #ccaaaa; margin-bottom: 10px; line-height: 1.4;
+        }
+
+        .whatsapp-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            background-color: #25D366; /* Keep WhatsApp Green (Brand Color) */
+            color: white;
+            text-decoration: none; padding: 10px 15px;
+            border-radius: 5px; font-size: 13px; font-weight: bold;
+            transition: background 0.3s;
+            width: 90%;
+        }
+
+        .whatsapp-btn:hover { background-color: #1ebc57; }
+
+        .footer {
+            margin-top: 20px; font-size: 10px; color: #552222;
+            border-top: 1px solid #2b0a0a; padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo-area">
+        <div class="logo-icon">❖</div> 
+        <h2>System Login</h2>
+        <p style="color: #884444; font-size: 12px; margin-top: 5px;">Secure Access Control</p>
+    </div>
+
+    <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="enter@email.com">
+    </div>
+
+    <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••">
+    </div>
+
+    <button class="login-btn" onclick="login()">Authenticate</button>
+    <p id="statusMsg"></p>
+
+    <div class="purchase-box">
+        <div class="purchase-title">Haven't got a Key?</div>
+        <div class="purchase-text">
+            Get Lifetime Access Key: <strong>LKR 1500/=</strong><br>
+            Send payment receipt to WhatsApp to approve.
+        </div>
+        <a href="https://wa.me/94716344483" target="_blank" class="whatsapp-btn">
+            WhatsApp: +94 71 634 4483
+        </a>
+    </div>
+
+    <div class="footer">
+        SERVER LATENCY: 32 MS • LIVE SYNC
+    </div>
+</div>
+
+<script type="module">
+  // 1. IMPORT FIREBASE SDK v12.8.0
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+
+  // 2. YOUR NEW CONFIGURATION
+  const firebaseConfig = {
+    apiKey: "AIzaSyBHmYKALLgEtjQHux3uaszbsQPXEghcMa4",
+    authDomain: "aviator-new-6fa55.firebaseapp.com",
+    projectId: "aviator-new-6fa55",
+    storageBucket: "aviator-new-6fa55.firebasestorage.app",
+    messagingSenderId: "630208137136",
+    appId: "1:630208137136:web:eb3aaed91e399d57def875",
+    measurementId: "G-ZHG4P406GG"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app); // Analytics initialized
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  function getDeviceId() {
+      let id = localStorage.getItem('device_id');
+      if (!id) {
+          id = crypto.randomUUID(); 
+          localStorage.setItem('device_id', id);
+      }
+      return id;
+  }
+
+  window.login = async () => {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      const msg = document.getElementById('statusMsg');
+      const deviceId = getDeviceId();
+
+      msg.innerText = "AUTHENTICATING...";
+      msg.style.color = "#ff3333"; // Red accent
+
+      try {
+          const userCred = await signInWithEmailAndPassword(auth, email, pass);
+          const user = userCred.user;
+
+          msg.innerText = "CHECKING DEVICE ID...";
+
+          const deviceRef = doc(db, "device_whitelist", deviceId);
+          const deviceSnap = await getDoc(deviceRef);
+
+          if (deviceSnap.exists()) {
+              const data = deviceSnap.data();
+              if (data.status === 'approved') {
+                  msg.innerText = "ACCESS GRANTED";
+                  msg.style.color = "#00ff88"; // Keep Success Green
+                  setTimeout(() => { window.location.href = "dashboard.html"; }, 800);
+              } else if (data.status === 'rejected') {
+                  await signOut(auth);
+                  msg.innerText = "ACCESS DENIED: DEVICE BANNED";
+                  msg.style.color = "#ff0000";
+              } else {
+                  await signOut(auth);
+                  msg.innerText = "PENDING APPROVAL (SEND RECEIPT ON WHATSAPP)";
+                  msg.style.color = "#ffaa00"; // Orange warning
+              }
+          } else {
+              await setDoc(deviceRef, {
+                  uid: user.uid,
+                  email: user.email,
+                  deviceName: navigator.userAgent, 
+                  status: 'pending',
+                  requestDate: new Date().toISOString()
+              });
+              await signOut(auth);
+              msg.innerText = "NEW DEVICE: PLEASE SEND RECEIPT TO APPROVE";
+              msg.style.color = "#ff3333";
+          }
+
+      } catch (error) {
+          console.error(error);
+          msg.innerText = "ERROR: " + error.message;
+          msg.style.color = "#ff0000";
+      }
+  }
+</script>
+
+</body>
+</html>
